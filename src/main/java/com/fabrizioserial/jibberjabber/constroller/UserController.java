@@ -36,10 +36,4 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("/search/{searchUser}")
-    @Timed
-    public ResponseEntity<?> getUser(@PathVariable("searchUser") String searchUser) {
-        UserDTO users = userService.searchUser(searchUser);
-        return ResponseEntity.ok(users);
-    }
 }

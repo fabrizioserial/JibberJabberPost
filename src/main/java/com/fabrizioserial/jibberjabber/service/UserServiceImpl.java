@@ -64,13 +64,4 @@ public class UserServiceImpl implements UserService{
                 .build();
     }
 
-    @Override
-    public UserDTO searchUser(String searchUser) {
-        User user = userRepository.findAllByUsernameContainingOrDisplayNameContaining(searchUser, searchUser);
-        return UserDTO.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .avatar(user.getAvatar())
-                .build();
-    }
 }

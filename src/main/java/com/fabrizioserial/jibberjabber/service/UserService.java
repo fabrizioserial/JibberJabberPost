@@ -10,8 +10,6 @@ public interface UserService {
 
     UserDTO getUser(UUID userId);
 
-    UserDTO searchUser(String searchUser);
-
     User getCurrentUser();
 
     User getUserById(UUID userId);
