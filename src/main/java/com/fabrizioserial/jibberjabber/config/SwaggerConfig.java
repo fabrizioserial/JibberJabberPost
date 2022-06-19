@@ -16,7 +16,7 @@ public class SwaggerConfig {
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.exceptionly.tutorials.demo.controller"))
+                .apis(RequestHandlerSelectors.basePackage("com.fabrizioserial.jibberjabber.controller"))
                 .apis(RequestHandlerSelectors.any())
                 .paths(PathSelectors.any())
                 .build();
