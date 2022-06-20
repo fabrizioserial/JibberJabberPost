@@ -24,12 +24,6 @@ public class PostServiceImpl implements PostService{
     }
 
     public List<Post> getAllPosts(){
-//        Post post = new Post();
-//        post.setBody("Hola como estas");
-//        post.setLikes(0);
-//        post.setGuidAuthor("123212423");
-//        post.setUuid(UUID.randomUUID());
-//        post.setTimeAdded(LocalDate.of(2001, Month.APRIL,11) );
         return postRepository.findAll();
     }
 
