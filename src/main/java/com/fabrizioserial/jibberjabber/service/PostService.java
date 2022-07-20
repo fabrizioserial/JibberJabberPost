@@ -1,24 +1,23 @@
 package com.fabrizioserial.jibberjabber.service;
 
-import com.fabrizioserial.jibberjabber.DTO.LikesPostDto;
-import com.fabrizioserial.jibberjabber.DTO.PostCreateDto;
-import com.fabrizioserial.jibberjabber.DTO.UpdatePostDto;
+import com.fabrizioserial.jibberjabber.DTO.*;
 import com.fabrizioserial.jibberjabber.model.Post;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface PostService {
 
-    Post createPost(PostCreateDto postCreateDto);
+    PostDto createPost(PostCreationDto postCreationDto);
 
-    List<Post> getAllPosts();
+    PostDto getPost(UUID postId);
 
-    void deletePost(UUID uuid);
+    Page<PostDto> getPostsByUser(UUID userId, int page, int size);
 
-    Post getPostByUuid(UUID uuid);
-    
-    Post likesPost(LikesPostDto likesPostDto);
+    PostDto createReply(UUID postId, ReplyCreationDto replyCreationDto);
 
-    Post updatePost(UpdatePostDto updatePostDto, UUID uuid);
+    void deletePost(UUID postId);
+
+    Page<PostDto> getAllPosts(int page, int size);
 }

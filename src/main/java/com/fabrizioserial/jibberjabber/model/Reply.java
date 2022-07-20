@@ -1,14 +1,11 @@
 package com.fabrizioserial.jibberjabber.model;
 
-import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +14,7 @@ import java.util.UUID;
 @Data
 @Builder
 @Entity
-public class Post {
+public class Reply {
 
     @Id
     @GeneratedValue
@@ -30,4 +27,7 @@ public class Post {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Reply> replies;
+
+    //private Long postId;
+
 }

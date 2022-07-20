@@ -1,6 +1,6 @@
 package com.fabrizioserial.jibberjabber.constroller;
 
-import com.fabrizioserial.jibberjabber.DTO.UserDTO;
+import com.fabrizioserial.jibberjabber.DTO.UserDto;
 import com.fabrizioserial.jibberjabber.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.metrics.annotation.Timed;
@@ -16,7 +16,7 @@ import java.util.UUID;
 @Timed("user_controller_time")
 public class UserController {
 
-    private final UserService userService;
+    private UserService userService;
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -25,15 +25,22 @@ public class UserController {
     @GetMapping("/")
     @Timed
     public ResponseEntity<?> getLoggedUser() {
-        UserDTO user = userService.getLoggedUser();
+        UserDto user = userService.getLoggedUser();
         return ResponseEntity.ok(user);
     }
 
     @GetMapping("/{id}")
     @Timed
     public ResponseEntity<?> getUser(@PathVariable("id") UUID userId) {
-        UserDTO user = userService.getUser(userId);
+        UserDto user = userService.getUser(userId);
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping("/search/{searchUser}")
+    @Timed
+    public ResponseEntity<?> getUser(@PathVariable("searchUser") String searchUser) {
+        UserDto users = userService.searchUser(searchUser);
+        return ResponseEntity.ok(users);
     }
 
 }

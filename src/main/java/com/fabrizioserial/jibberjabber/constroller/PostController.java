@@ -1,59 +1,56 @@
 package com.fabrizioserial.jibberjabber.constroller;
 
-import com.fabrizioserial.jibberjabber.DTO.LikesPostDto;
-import com.fabrizioserial.jibberjabber.DTO.PostCreateDto;
-import com.fabrizioserial.jibberjabber.DTO.UpdatePostDto;
-import com.fabrizioserial.jibberjabber.model.Post;
-import com.fabrizioserial.jibberjabber.service.PostServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.fabrizioserial.jibberjabber.DTO.PostCreationDto;
+import com.fabrizioserial.jibberjabber.DTO.PostDto;
+import com.fabrizioserial.jibberjabber.DTO.ReplyCreationDto;
+import com.fabrizioserial.jibberjabber.service.PostService;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(path = "/post/")
+@RequestMapping("/post")
 public class PostController {
 
-    @Autowired
-    private final PostServiceImpl postService;
+    private final PostService postService;
 
-    public PostController(PostServiceImpl postService){
+    public PostController(PostService postService) {
         this.postService = postService;
     }
 
-    @GetMapping(path = "getall")
-    public ResponseEntity<List<Post>> getAllPosts(){
-        //        return ResponseEntity.status(HttpStatus.OK).body(todos);
-        return ResponseEntity.status(HttpStatus.OK).body(postService.getAllPosts());
+    @PostMapping("/")
+    public PostDto createPost(@RequestBody PostCreationDto postCreationDto) {
+        return postService.createPost(postCreationDto);
     }
 
-    @GetMapping(path = "get/{uuid}")
-    public ResponseEntity<Post> getPostByUuid(@PathVariable UUID uuid){
-        return ResponseEntity.status(HttpStatus.OK).body(postService.getPostByUuid(uuid));
+    @GetMapping("/{postId}")
+    public PostDto getPost(@Valid @PathVariable("postId") UUID id) {
+        return postService.getPost(id);
     }
 
-    @PostMapping(path = "create")
-    public ResponseEntity<Post> createPost(@RequestBody PostCreateDto postCreateDto){
-        return ResponseEntity.status(HttpStatus.OK).body(postService.createPost(postCreateDto));
+    @GetMapping("/user/{userId}")
+    public Page<PostDto> getPostsByUser(@PathVariable("userId") UUID userId,
+                                        @RequestParam(value = "page", defaultValue = "0") int page,
+                                        @RequestParam(value = "size", defaultValue = "10") int size) {
+        return postService.getPostsByUser(userId, page, size);
     }
 
-    @PostMapping(path = "likes")
-    public ResponseEntity<Post> likesPost(@RequestBody LikesPostDto likesPostDto){
-        return ResponseEntity.status(HttpStatus.OK).body(postService.likesPost(likesPostDto));
+    @GetMapping("")
+    public Page<PostDto> getAllPosts(@RequestParam(value = "page", defaultValue = "0") int page,
+                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+        return postService.getAllPosts(page, size);
     }
 
-    @PostMapping(path = "update/{uuid}")
-    public ResponseEntity<Post> updatePost(@PathVariable UUID uuid, @RequestBody UpdatePostDto updatePostDto){
-        return ResponseEntity.status(HttpStatus.OK).body(postService.updatePost(updatePostDto, uuid));
+    @PostMapping("/{postId}/reply")
+    public PostDto replyPost(@Valid @PathVariable("postId") UUID postId,
+                             @RequestBody ReplyCreationDto replyCreationDto) {
+        return postService.createReply(postId, replyCreationDto);
     }
 
-    @DeleteMapping(path = "delete/{uuid}")
-    public ResponseEntity<?> deletePost(@PathVariable UUID uuid){
-        postService.deletePost(uuid);
-        return ResponseEntity.noContent().build();
+    @DeleteMapping("/{postId}")
+    public void deletePost(@Valid @PathVariable("postId") UUID id) {
+        postService.deletePost(id);
     }
-
 }

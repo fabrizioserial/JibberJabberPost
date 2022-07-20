@@ -1,74 +1,107 @@
 package com.fabrizioserial.jibberjabber.service;
 
-import com.fabrizioserial.jibberjabber.DTO.LikesPostDto;
-import com.fabrizioserial.jibberjabber.DTO.PostCreateDto;
-import com.fabrizioserial.jibberjabber.DTO.UpdatePostDto;
-import com.fabrizioserial.jibberjabber.exception.PostNotFoundException;
+import com.fabrizioserial.jibberjabber.DTO.PostCreationDto;
+import com.fabrizioserial.jibberjabber.DTO.PostDto;
+import com.fabrizioserial.jibberjabber.DTO.ReplyCreationDto;
 import com.fabrizioserial.jibberjabber.model.Post;
+import com.fabrizioserial.jibberjabber.model.Reply;
+import com.fabrizioserial.jibberjabber.model.User;
 import com.fabrizioserial.jibberjabber.repository.PostRepository;
-import lombok.val;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.net.http.HttpClient;
-import java.time.OffsetDateTime;
-import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 @Service
 public class PostServiceImpl implements PostService{
 
     private final PostRepository postRepository;
 
-    public PostServiceImpl(PostRepository postRepository ){
-        this.postRepository = postRepository;
-    }
+    private final UserService userService;
 
-    public List<Post> getAllPosts(){
-        return postRepository.findAll();
+    private final Logger logger = Logger.getLogger(PostServiceImpl.class.getName());
+
+    public PostServiceImpl(PostRepository postRepository, UserService userService) {
+        this.postRepository = postRepository;
+        this.userService = userService;
     }
 
     @Override
-    public void deletePost(UUID uuid) {
-        if (postRepository.existsById(uuid)) {
-            postRepository.deleteById(uuid);
+    public PostDto createPost(PostCreationDto postCreationDto) {
+        User user = userService.getCurrentUser();
+        if(user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        Post post = Post.builder()
+                .content(postCreationDto.getText())
+                .user(user)
+                .replies(new ArrayList<>())
+                .build();
+        logger.info("New Post Started");
+        post = postRepository.save(post);
+        logger.info("User " + post.getUser().getId() + " has posted: " + post.getId());
+        return PostDto.from(post);
+    }
+
+    @Override
+    public PostDto getPost(UUID postId) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        return PostDto.from(post);
+    }
+
+    @Override
+    public Page<PostDto> getPostsByUser(UUID userId, int page, int size) {
+        User user = userService.getUserById(userId);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        } else {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Post> posts = postRepository.findAllByUserId(userId, pageable);
+            return posts.map(PostDto::from);
         }
     }
 
     @Override
-    public Post getPostByUuid(UUID uuid) {
-        return postRepository.findById(uuid).orElse(null);
-    }
-
-    @Override
-    public Post updatePost(UpdatePostDto updatePostDto, UUID uuid) {
-        val postFound = postRepository.findById(uuid);
-        if(postFound.isEmpty()) throw new PostNotFoundException(String.format("There is any post with id %s", uuid));
-        val post = postFound.get();
-        post.setBody(updatePostDto.getBody());
-        return post;
-    }
-
-    @Override
-    public Post likesPost(LikesPostDto likesPostDto) {
-        val postFound = postRepository.findById(likesPostDto.getPost());
-        if(postFound.isEmpty()) throw new PostNotFoundException(String.format("There is any post with id %s", likesPostDto.getPost()));
-        List<UUID> newListOfLikes = postFound.get().getLikes();
-        newListOfLikes.add(likesPostDto.getUser());
-        postFound.get().setLikes(newListOfLikes);
-        return postRepository.save(postFound.get());
-    }
-
-    public Post createPost(PostCreateDto postCreateDto){
-        Post post = Post.builder()
-                .body(postCreateDto.getBody())
-                .likes(List.of())
-                .guidAuthor(postCreateDto.getGuidAuthor())
-                .createdDate(OffsetDateTime.now())
-                .lastModifiedDate(OffsetDateTime.now())
+    public PostDto createReply(UUID postId, ReplyCreationDto replyCreationDto) {
+        User user = userService.getCurrentUser();
+        if(user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        Reply reply = Reply.builder()
+                .content(replyCreationDto.getText())
+                .user(user)
                 .build();
-
-        return postRepository.save(post);
+        post.getReplies().add(reply);
+        logger.info("New Reply");
+        post = postRepository.save(post);
+        logger.info("User " + reply.getUser().getId() + " has replied to post " + post.getId());
+        return PostDto.from(post);
     }
 
+    @Override
+    public void deletePost(UUID postId) {
+        logger.info("Deleting Post: " + postId);
+        Post post = postRepository.findById(postId).orElseThrow(() -> new RuntimeException("Post not found"));
+        User user = userService.getCurrentUser();
+        if(user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+        if(user.getId() != post.getUser().getId()) {
+            throw new IllegalArgumentException("User cannot delete post for other user");
+        }
+        postRepository.delete(post);
+        logger.info("Post deleted");
+    }
 
+    @Override
+    public Page<PostDto> getAllPosts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Post> posts = postRepository.findAll(pageable);
+        return posts.map(PostDto::from);
+    }
 }

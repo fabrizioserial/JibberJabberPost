@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.util.UUID;
 
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
@@ -20,8 +21,11 @@ public class User {
     @GeneratedValue
     private UUID id;
 
-    @Column(unique=true)
     private String username;
+
+    private String displayName;
+
+    private String bio;
 
     @Builder.Default
     private String avatar = "/generic-avatar.jpg";

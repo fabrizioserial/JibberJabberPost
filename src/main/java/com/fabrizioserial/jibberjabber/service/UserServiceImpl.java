@@ -1,6 +1,6 @@
 package com.fabrizioserial.jibberjabber.service;
 
-import com.fabrizioserial.jibberjabber.DTO.UserDTO;
+import com.fabrizioserial.jibberjabber.DTO.UserDto;
 import com.fabrizioserial.jibberjabber.model.User;
 import com.fabrizioserial.jibberjabber.repository.UserRepository;
 import org.keycloak.KeycloakPrincipal;
@@ -22,11 +22,13 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDTO getLoggedUser() {
+    public UserDto getLoggedUser() {
         User user = getCurrentUser();
-        return UserDTO.builder()
+        return UserDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .displayName(user.getDisplayName())
+                .bio(user.getBio())
                 .avatar(user.getAvatar())
                 .build();
     }
@@ -43,6 +45,8 @@ public class UserServiceImpl implements UserService{
             User newUser = User.builder()
                     .id(UUID.randomUUID())
                     .username(username)
+                    .displayName(username)
+                    .bio("")
                     .build();
             return userRepository.save(newUser);
         }
@@ -55,11 +59,25 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public UserDTO getUser(UUID userId) {
+    public UserDto getUser(UUID userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
-        return UserDTO.builder()
+        return UserDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
+                .displayName(user.getDisplayName())
+                .bio(user.getBio())
+                .avatar(user.getAvatar())
+                .build();
+    }
+
+    @Override
+    public UserDto searchUser(String searchUser) {
+        User user = userRepository.findAllByUsernameContainingOrDisplayNameContaining(searchUser, searchUser);
+        return UserDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .displayName(user.getDisplayName())
+                .bio(user.getBio())
                 .avatar(user.getAvatar())
                 .build();
     }

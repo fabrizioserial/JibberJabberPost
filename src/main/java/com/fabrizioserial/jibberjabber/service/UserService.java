@@ -1,14 +1,16 @@
 package com.fabrizioserial.jibberjabber.service;
 
-import com.fabrizioserial.jibberjabber.DTO.UserDTO;
+import com.fabrizioserial.jibberjabber.DTO.UserDto;
 import com.fabrizioserial.jibberjabber.model.User;
 
 import java.util.UUID;
 
 public interface UserService {
-    UserDTO getLoggedUser();
+    UserDto getLoggedUser();
 
-    UserDTO getUser(UUID userId);
+    UserDto getUser(UUID userId);
+
+    UserDto searchUser(String searchUser);
 
     User getCurrentUser();
 
