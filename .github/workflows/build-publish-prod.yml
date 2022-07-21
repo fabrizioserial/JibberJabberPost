@@ -89,11 +89,11 @@ jobs:
       - name: Pull image on VM
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
+          host: ${{ secrets.VM_HOST_PROD }}
+          username: ${{ secrets.VM_USERNAME_PROD }}
+          password: ${{ secrets.VM_PASSWORD_PROD }}
           script: |
-            cd JibberJabberCompose
+            cd jibberJabberBlackOps2
             docker compose stop post-api
             docker compose pull post-api
             docker compose up -d post-api
